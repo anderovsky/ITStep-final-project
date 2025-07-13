@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Library</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-blue-600 text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold">My Library</h1>
+            {% if current_user.is_authenticated %}
+                <div class="space-x-4">
+                    <a href="{{ url_for('index') }}" class="hover:underline">Home</a>
+                    <a href="{{ url_for('add_book') }}" class="hover:underline">Add Book</a>
+                    <a href="{{ url_for('logout') }}" class="hover:underline">Logout</a>
+                </div>
+            {% endif %}
+        </div>
+    </nav>
+
+    <main class="container mx-auto mt-8 p-4">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
