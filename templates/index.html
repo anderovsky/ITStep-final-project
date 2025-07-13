@@ -12,19 +12,29 @@
 {% if books %}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for book in books %}
-        <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="bg-white rounded-lg shadow-md p-6 {% if book.is_lent %}border-l-4 border-orange-500{% endif %}">
             <h3 class="text-xl font-bold mb-2">{{ book.title }}</h3>
             <p class="text-gray-600 mb-2">by {{ book.author }}</p>
-            <p class="text-sm text-gray-500 mb-2">📍 {{ book.room }} - {{ book.shelf }}</p>
-            
+            <p class="text-sm text-gray-500 mb-4">📍 {{ book.room }} - {{ book.shelf }}</p>
+
             {% if book.is_lent %}
-                <p class="text-red-500 text-sm">
-                    📤 Lent to: {{ book.lent_to }}
-                    <br>
-                    Since: {{ book.lent_date.strftime('%Y-%m-%d') }}
-                </p>
+                <div class="bg-orange-50 p-3 rounded mb-4">
+                    <p class="text-orange-700 font-semibold">📤 Lent to: {{ book.lent_to }}</p>
+                    <p class="text-orange-600 text-sm">Since: {{ book.lent_date.strftime('%B %d, %Y') }}</p>
+                </div>
+                <a href="{{ url_for('return_book', book_id=book.id) }}"
+                   class="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-center block"
+                   onclick="return confirm('Mark this book as returned?')">
+                    Mark as Returned
+                </a>
             {% else %}
-                <p class="text-green-500 text-sm">📚 Available</p>
+                <div class="mb-4">
+                    <p class="text-green-500 text-sm font-semibold">📚 Available</p>
+                </div>
+                <a href="{{ url_for('lend_book', book_id=book.id) }}"
+                   class="w-full bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded text-center block">
+                    Lend Out
+                </a>
             {% endif %}
         </div>
         {% endfor %}
@@ -32,7 +42,7 @@
 {% else %}
     <div class="text-center py-12">
         <p class="text-gray-500 text-lg">No books in your library yet.</p>
-        <a href="{{ url_for('add_book') }}" 
+        <a href="{{ url_for('add_book') }}"
            class="mt-4 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
             Add Your First Book
         </a>

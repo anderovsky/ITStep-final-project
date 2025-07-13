@@ -115,14 +115,58 @@ def add_book():
 
 
 # Debug route to check database
-@app.route('/debug')
-def debug():
-    try:
-        users = User.query.all()
-        books = Book.query.all()
-        return f"Users: {len(users)}, Books: {len(books)}"
-    except Exception as e:
-        return f"Database error: {e}"
+@app.route('/lend_book/<int:book_id>', methods=['GET', 'POST'])
+@login_required
+def lend_book(book_id):
+    book = Book.query.get_or_404(book_id)
+
+    if book.is_lent:
+        flash('This book is already lent out!')
+        return redirect(url_for('index'))
+
+    if request.method == 'POST':
+        lent_to = request.form.get('lent_to')
+
+        if not lent_to:
+            flash('Please enter who you are lending the book to')
+            return render_template('lend_book.html', book=book)
+
+        # Update book lending info
+        book.is_lent = True
+        book.lent_to = lent_to
+        book.lent_date = datetime.now()
+
+        db.session.commit()
+        flash(f'Book "{book.title}" has been lent to {lent_to}!')
+        return redirect(url_for('index'))
+
+    return render_template('lend_book.html', book=book)
+
+
+@app.route('/return_book/<int:book_id>')
+@login_required
+def return_book(book_id):
+    book = Book.query.get_or_404(book_id)
+
+    if not book.is_lent:
+        flash('This book is not currently lent out!')
+        return redirect(url_for('index'))
+
+    # Reset lending info
+    book.is_lent = False
+    book.lent_to = None
+    book.lent_date = None
+
+    db.session.commit()
+    flash(f'Book "{book.title}" has been returned!')
+    return redirect(url_for('index'))
+
+
+@app.route('/lent_books')
+@login_required
+def lent_books():
+    books = Book.query.filter_by(is_lent=True).all()
+    return render_template('lent_books.html', books=books)
 
 
 def init_db():
