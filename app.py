@@ -114,7 +114,51 @@ def add_book():
     return render_template('add_book.html')
 
 
-# Debug route to check database
+@app.route('/edit_book/<int:book_id>', methods=['GET', 'POST'])
+@login_required
+def edit_book(book_id):
+    book = Book.query.get_or_404(book_id)
+
+    if request.method == 'POST':
+        title = request.form.get('title')
+        author = request.form.get('author')
+        room = request.form.get('room')
+        shelf = request.form.get('shelf')
+
+        if not all([title, author, room, shelf]):
+            flash('Please fill in all fields')
+            return render_template('edit_book.html', book=book)
+
+        # Update book details
+        book.title = title
+        book.author = author
+        book.room = room
+        book.shelf = shelf
+
+        db.session.commit()
+        flash(f'Book "{book.title}" updated successfully!')
+        return redirect(url_for('index'))
+
+    return render_template('edit_book.html', book=book)
+
+
+@app.route('/delete_book/<int:book_id>')
+@login_required
+def delete_book(book_id):
+    book = Book.query.get_or_404(book_id)
+
+    # Check if book is currently lent out
+    if book.is_lent:
+        flash(f'Cannot delete book "{book.title}" - it is currently lent out to {book.lent_to}')
+        return redirect(url_for('index'))
+
+    title = book.title  # Store title for flash message
+    db.session.delete(book)
+    db.session.commit()
+    flash(f'Book "{title}" deleted successfully!')
+    return redirect(url_for('index'))
+
+
 @app.route('/lend_book/<int:book_id>', methods=['GET', 'POST'])
 @login_required
 def lend_book(book_id):
