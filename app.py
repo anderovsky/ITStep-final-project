@@ -192,10 +192,8 @@ if __name__ == '__main__':
     with app.app_context():
         init_db()
 
-    print("\n" + "=" * 50)
-    print("🚀 Flask Library App Starting...")
-    print("📍 URL: http://localhost:5000")
-    print("🔑 Login: admin / password")
-    print("=" * 50 + "\n")
+    print("Flask Library App Starting...")
+    print("URL: http://localhost:5000")
+    print("Login: admin / password")
 
     app.run(debug=True)
